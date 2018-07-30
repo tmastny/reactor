@@ -1,6 +1,10 @@
 var cmd_count = 1;
 var cmdInputBinding = new Shiny.InputBinding();
 
+$(document).on('change', '.reactnb-command', function(e) {
+  Shiny.onInputChange('cmd_count', cmd_count);
+});
+
 $.extend(cmdInputBinding, {
   nextId: 0,
   history: [],
@@ -9,9 +13,10 @@ $.extend(cmdInputBinding, {
     return $(scope).find('.reactnb-command');
   },
   getValue: function(el) {
-    return $.extend(true, this.parseInput(el), {
-      id: 'cmd' + this.nextId++
+    var ob = $.extend(true, this.parseInput(el), {
+      id: 'cmd' + $(el).attr('id').substr(-1)
     });
+    return ob;
   },
   parseInput: function(el) {
     var val = $(el).val();
@@ -62,13 +67,26 @@ $.extend(cmdInputBinding, {
         self.historyPos = self.history.length;
 
         if ($(this).attr('id') == ("command" + cmd_count)) {
-          newCmd = $('<input type="command" id="command' + ++cmd_count + '" class="reactnb-command" autocomplete="off" autocorrect="off"/><br/>');
-          $('.container-fluid').append(newCmd);
-        }
+          var newCmd = $('<input type="command" id="command' + (cmd_count + 1) + '" class="reactnb-command" autocomplete="off" autocorrect="off"/><br/>');
 
-        var outputClass = 'highlight-text-output';
-        var outputDiv = $('<div id="out' + self.nextId + '_output" class="output ' + outputClass + '">');
-        $el.append(outputDiv);
+          var outputClass = 'highlight-text-output';
+          var parsed = self.parseInput(el);
+          if (parsed.type === 'plot') {
+            outputClass = 'shiny-plot-output';
+          } else if (parsed.type === 'table') {
+            outputClass = 'shiny-html-output';
+          } else if (parsed.type === 'text') {
+            outputClass = 'highlight-text-output';
+          } else if (parsed.type === 'html' || parsed.type === 'ui') {
+            outputClass = 'shiny-html-output';
+          }
+          var newOutput = $('<div id="cmd' + (cmd_count + 1) + '_output" class="output ' + outputClass + '">');
+
+          $('.container-fluid').append(newCmd);
+          $('.container-fluid').append(newOutput);
+
+          cmd_count++;
+        }
 
         Shiny.bindAll();
         callback();
