@@ -183,6 +183,10 @@ substitute(f <- function(a) {a + y}, e)
 #   foo2()
 # }
 
-
+library(rlang)
+e <- new.env()
+e$y <- 1
+env_bind_fns(e, y = function(val) {print("getting called"); 1})
+eval(expr(x + y + 1), e)
 
 

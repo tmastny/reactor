@@ -17,6 +17,19 @@ server <- function(input, output) {
     expr
   }
   
+  vals <- reactiveValues()
+
+  `%<<%` <- function(var, val, ...) {
+    name_string <- expr_name(enexpr(var))
+    .subset2(vals, 'impl')$set(name_string, val)
+    
+    eval(expr(!!enexpr(var) <- !!enexpr(val)), sessionEnv)
+    env_bind_fns(sessionEnv,
+      !!enexpr(var) := ~.subset2(vals, 'impl')$get(name_string)
+    )
+    val
+  }
+  
   observing_expr <- function(x) {
     e <- expr(
       observe({
