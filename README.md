@@ -7,4 +7,8 @@ powered by Shiny's built-in
 
 `reactor` is powered a new reactive assignment operator `%<<%`. 
 
+```r
+shiny::runApp("reactive_app.R")
+```
+
 ![](reactor.gif)
